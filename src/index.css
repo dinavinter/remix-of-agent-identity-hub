@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* SAP Fiori Design System - Agent Identity Management */
+
+@layer base {
+  :root {
+    /* SAP Fiori Core Colors */
+    --background: 210 20% 98%;
+    --foreground: 210 11% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 15%;
+
+    /* SAP Blue - Primary brand color */
+    --primary: 207 90% 43%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 210 11% 15%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 11% 45%;
+
+    --accent: 210 20% 96%;
+    --accent-foreground: 210 11% 15%;
+
+    /* SAP Semantic Colors */
+    --destructive: 0 76% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 145 63% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 36 100% 50%;
+    --warning-foreground: 210 11% 15%;
+
+    --info: 207 90% 43%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 210 14% 89%;
+    --input: 210 14% 89%;
+    --ring: 207 90% 43%;
+
+    --radius: 0.25rem;
+
+    /* SAP Shell Header */
+    --shell: 210 29% 24%;
+    --shell-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 210 11% 25%;
+    --sidebar-primary: 207 90% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 210 11% 15%;
+    --sidebar-border: 210 14% 89%;
+    --sidebar-ring: 207 90% 43%;
+
+    /* SAP Tile specific */
+    --tile-background: 0 0% 100%;
+    --tile-foreground: 210 11% 15%;
+    --tile-border: 210 14% 89%;
+  }
+
+  .dark {
+    --background: 210 11% 11%;
+    --foreground: 210 20% 98%;
+
+    --card: 210 11% 15%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 210 11% 15%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 207 90% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 11% 20%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 210 11% 20%;
+    --muted-foreground: 210 20% 65%;
+
+    --accent: 210 11% 20%;
+    --accent-foreground: 210 20% 98%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 145 63% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 36 100% 50%;
+    --warning-foreground: 210 11% 15%;
+
+    --info: 207 90% 54%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 210 11% 25%;
+    --input: 210 11% 25%;
+    --ring: 207 90% 54%;
+
+    --shell: 210 11% 8%;
+    --shell-foreground: 210 20% 98%;
+
+    --sidebar-background: 210 11% 11%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 207 90% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 11% 20%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 210 11% 25%;
+    --sidebar-ring: 207 90% 54%;
+
+    --tile-background: 210 11% 15%;
+    --tile-foreground: 210 20% 98%;
+    --tile-border: 210 11% 25%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "72", "72full", Arial, Helvetica, sans-serif;
+  }
+}
+
+/* SAP Fiori Typography */
+@layer utilities {
+  .fiori-title-1 {
+    @apply text-2xl font-normal tracking-tight;
+  }
+
+  .fiori-title-2 {
+    @apply text-xl font-normal;
+  }
+
+  .fiori-title-3 {
+    @apply text-lg font-normal;
+  }
+
+  .fiori-label {
+    @apply text-sm font-normal text-muted-foreground;
+  }
+
+  .fiori-body {
+    @apply text-sm font-normal;
+  }
+}
