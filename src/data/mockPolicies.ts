@@ -20,6 +20,7 @@ export const policyTargetTemplates = [
   { value: "commerce-mcp", label: "commerce-mcp", type: "MCP Server" as TargetType },
   { value: "ariba-mcp", label: "ariba-mcp", type: "MCP Server" as TargetType },
   { value: "concur-mcp", label: "concur-mcp", type: "MCP Server" as TargetType },
+  { value: "discovery", label: "Discovery", type: "MCP Tool" as TargetType },
 ];
 
 export const attributeTypes = [
@@ -33,7 +34,7 @@ export const attributeTypes = [
 export const attributeValues: Record<string, string[]> = {
   "risk-level": ["sensitive", "high", "medium", "low"],
   "access-level": ["authenticated-user", "admin", "viewer", "editor"],
-  "createdBy": ["sap:ariba", "sap:concur", "sap:commerce", "external"],
+  "createdBy": ["sap:*", "sap:ariba", "sap:concur", "sap:commerce", "external"],
   "department": ["IT", "Finance", "HR", "Sales"],
   "region": ["EMEA", "APAC", "Americas", "Global"],
 };
@@ -92,6 +93,15 @@ export const mockPolicies: PolicyRule[] = [
     targetType: "MCP Tool",
     whereAttribute: "department",
     whereValue: "Finance",
+  },
+  {
+    id: "pol-007",
+    agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    actionType: "Allow",
+    target: "discovery",
+    targetType: "MCP Tool",
+    whereAttribute: "createdBy",
+    whereValue: "sap:*",
   },
 ];
 
