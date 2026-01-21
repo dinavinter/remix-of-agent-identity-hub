@@ -95,8 +95,10 @@ export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItem
         {rule.actionType}
       </Badge>
       
+      <span className="text-muted-foreground text-sm">Invoke Tool</span>
+      
       <Badge variant="secondary" className="font-mono text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
-        {rule.target}: {rule.targetType}
+        {rule.target}
       </Badge>
       
       <div className="flex-1" />
