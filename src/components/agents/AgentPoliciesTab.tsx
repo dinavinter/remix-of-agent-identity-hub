@@ -48,6 +48,13 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
     toast.success("Policy rule removed");
   };
 
+  const handleUpdateValue = (id: string, newValue: string) => {
+    setPolicies((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, whereValue: newValue } : p))
+    );
+    toast.success("Policy value updated");
+  };
+
   const handleAddRule = () => {
     if (!newTarget || !newWhereAttribute || !newWhereValue) {
       toast.error("Please fill in all fields");
@@ -118,6 +125,7 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
                   key={rule.id}
                   rule={rule}
                   onDelete={handleDeleteRule}
+                  onUpdateValue={handleUpdateValue}
                 />
               ))}
             </div>
