@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Home, Pencil, Trash2, Save, X, Bot, Users } from "lucide-react";
+import { Home, Pencil, Trash2, Save, X, Bot, Users, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { Agent } from "@/data/mockAgents";
 import { getGroupsForAgent } from "@/data/mockGroups";
@@ -50,6 +50,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AgentPoliciesTab } from "@/components/agents/AgentPoliciesTab";
 
 export default function AgentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -211,6 +212,10 @@ export default function AgentDetail() {
             <TabsTrigger value="timestamps">Timestamps</TabsTrigger>
             <TabsTrigger value="custom">Custom Attributes</TabsTrigger>
             <TabsTrigger value="groups">Groups</TabsTrigger>
+            <TabsTrigger value="policies" className="flex items-center gap-1.5">
+              <Shield className="h-3.5 w-3.5" />
+              Policies
+            </TabsTrigger>
           </TabsList>
 
           {/* Personal Information Tab */}
@@ -542,6 +547,11 @@ export default function AgentDetail() {
                 })()}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Policies Tab */}
+          <TabsContent value="policies">
+            <AgentPoliciesTab agent={agent} />
           </TabsContent>
         </Tabs>
       </main>
