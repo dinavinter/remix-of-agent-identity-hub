@@ -41,25 +41,14 @@ export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItem
 
   return (
     <div className="flex items-center gap-3 p-3 bg-card border rounded-lg group hover:border-primary/30 transition-colors">
-      <Badge 
-        variant="outline" 
-        className={`${actionTypeStyles[rule.actionType]} font-medium px-3 py-1`}
-      >
-        {rule.actionType}
-      </Badge>
-      
-      <Badge variant="secondary" className="font-mono text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
-        {rule.target}: {rule.targetType}
-      </Badge>
-      
-      <span className="text-muted-foreground text-sm">Where</span>
+      <span className="text-muted-foreground text-sm font-medium">Where</span>
       
       {/* Attribute Badge (non-editable) */}
       <Badge variant="outline" className="font-mono text-xs px-2 py-1 bg-muted text-muted-foreground border-border">
         {rule.whereAttribute}
       </Badge>
 
-      <span className="text-muted-foreground text-sm">:</span>
+      <span className="text-muted-foreground text-sm">is</span>
 
       {/* Value Badge (editable with autocomplete) */}
       <Popover open={open} onOpenChange={setOpen}>
@@ -98,6 +87,17 @@ export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItem
           </Command>
         </PopoverContent>
       </Popover>
+
+      <Badge 
+        variant="outline" 
+        className={`${actionTypeStyles[rule.actionType]} font-medium px-3 py-1`}
+      >
+        {rule.actionType}
+      </Badge>
+      
+      <Badge variant="secondary" className="font-mono text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
+        {rule.target}: {rule.targetType}
+      </Badge>
       
       <div className="flex-1" />
       
