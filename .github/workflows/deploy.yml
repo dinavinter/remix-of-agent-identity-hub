@@ -46,7 +46,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          # Dynamically determine the git host domain from github.server_url
+          SERVER_URL="${{ github.server_url }}"
+          DOMAIN="${SERVER_URL#*://}"
+          
+          git remote set-url origin "https://git:${GITHUB_TOKEN}@${DOMAIN}/${GITHUB_REPOSITORY}.git"
           
           ADD_FLAG=""
           if [[ "${{ steps.config.outputs.clean }}" == "false" ]]; then
