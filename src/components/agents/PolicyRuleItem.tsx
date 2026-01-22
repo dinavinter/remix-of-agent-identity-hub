@@ -29,7 +29,6 @@ const actionTypeStyles: Record<PolicyActionType, string> = {
   "Allow": "bg-success/15 text-success border-success/30 hover:bg-success/20",
   "Deny": "bg-destructive/15 text-destructive border-destructive/30 hover:bg-destructive/20",
   "Ask For Consent": "bg-info/15 text-info border-info/30 hover:bg-info/20",
-  "Invoke Tool": "bg-primary/15 text-primary border-primary/30 hover:bg-primary/20",
 };
 
 function ResourceDisplay({ resource }: { resource: ResourceDefinition }) {
@@ -158,6 +157,17 @@ function ConditionList({ conditions, type, onUpdateValue }: { conditions: Policy
 }
 
 export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItemProps) {
+  const getActionPhrase = () => {
+    switch (rule.actionType) {
+      case "Ask For Consent":
+        return "to invoke/access";
+      case "Allow":
+      case "Deny":
+      default:
+        return "invoke/access";
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-2 p-3 bg-card border rounded-lg group hover:border-primary/30 transition-colors">
       
@@ -168,13 +178,18 @@ export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItem
         onUpdateValue={(idx, val) => onUpdateValue?.(rule.id, 'when', idx, val)}
       />
 
-      {/* Action Type */}
+      {/* Action Type (Decision) */}
       <Badge 
         variant="outline" 
         className={`${actionTypeStyles[rule.actionType]} font-medium px-3 py-1`}
       >
         {rule.actionType}
       </Badge>
+
+      {/* Connection Phrase */}
+      <span className="text-muted-foreground text-sm font-medium">
+        {getActionPhrase()}
+      </span>
 
       {/* Resource */}
       <ResourceDisplay resource={rule.resource} />

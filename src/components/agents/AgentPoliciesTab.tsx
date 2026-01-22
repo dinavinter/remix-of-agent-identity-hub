@@ -211,7 +211,7 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
 
             {/* Action & Resource */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Action:</Label>
+              <Label className="text-xs text-muted-foreground">Decision:</Label>
               <Select
                 value={newActionType}
                 onValueChange={(v) => setNewActionType(v as PolicyActionType)}
@@ -223,7 +223,6 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
                   <SelectItem value="Allow">Allow</SelectItem>
                   <SelectItem value="Deny">Deny</SelectItem>
                   <SelectItem value="Ask For Consent">Ask For Consent</SelectItem>
-                  <SelectItem value="Invoke Tool">Invoke Tool</SelectItem>
                 </SelectContent>
               </Select>
             </div>

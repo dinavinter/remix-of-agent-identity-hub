@@ -1,5 +1,5 @@
 
-export type PolicyActionType = "Allow" | "Deny" | "Ask For Consent" | "Invoke Tool";
+export type PolicyActionType = "Allow" | "Deny" | "Ask For Consent";
 export type ResourceType = "Tools" | "MCP Server" | "Agent";
 
 export interface ResourceServerFilter {
@@ -34,8 +34,11 @@ export const attributeTypes = [
   // When attributes (Context/Subject)
   { value: "user.role", label: "User Role", type: "when" },
   { value: "user.location", label: "User Location", type: "when" },
+  { value: "user.group", label: "User Group", type: "when" },
   { value: "agent.owner", label: "Agent Owner", type: "when" },
+  { value: "agent.createdBy", label: "Agent Created By", type: "when" },
   { value: "owner.consented", label: "Owner Consented", type: "when" },
+  { value: "active-orders", label: "Active Orders", type: "when" },
   
   // Where attributes (Resource/Object)
   { value: "region", label: "Region", type: "where" },
@@ -46,13 +49,17 @@ export const attributeTypes = [
   { value: "data-type", label: "Data Type", type: "where" },
   { value: "server.region", label: "Server Region", type: "where" },
   { value: "server.subaccount", label: "Server Subaccount", type: "where" },
+  { value: "id", label: "ID", type: "where" },
 ];
 
 export const attributeValues: Record<string, string[]> = {
   "user.role": ["admin", "viewer", "editor"],
+  "user.group": ["admin", "finance", "hr"],
   "user.location": ["EMEA", "US", "APAC"],
   "agent.owner": ["org:acheme", "org:sap", "user:me"],
+  "agent.createdBy": ["sap/ariba", "sap/concur", "internal"],
   "owner.consented": ["true", "false"],
+  "active-orders": ["4", "10", "100"],
   
   "region": ["EMEA", "EU", "US", "APAC"],
   "subaccount": ["Production", "Staging", "Global"],
@@ -62,6 +69,7 @@ export const attributeValues: Record<string, string[]> = {
   "data-type": ["pii", "financial", "technical"],
   "server.region": ["EU", "US", "APAC"],
   "server.subaccount": ["Production", "Staging"],
+  "id": ["create-order", "delete-order", "view-products"],
 };
 
 export const resourceTypes: ResourceType[] = [
@@ -74,13 +82,13 @@ export const mockPolicies: PolicyRule[] = [
   {
     id: "pol-ams-1",
     agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    actionType: "Invoke Tool",
+    actionType: "Allow",
     resource: {
       type: "Tools",
       server: "ariba-mcp"
     },
     whenConditions: [
-      { attribute: "user.role", operator: "=", value: "admin" }
+      { attribute: "user.group", operator: "=", value: "admin" }
     ],
     whereConditions: [
       { attribute: "category", operator: "=", value: "tier3" }
@@ -89,15 +97,15 @@ export const mockPolicies: PolicyRule[] = [
   {
     id: "pol-ams-2",
     agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    actionType: "Invoke Tool",
+    actionType: "Allow",
     resource: {
       type: "Tools"
     },
     whenConditions: [
-      { attribute: "agent.owner", operator: "=", value: "org:acheme" }
+      { attribute: "agent.createdBy", operator: "=", value: "sap/ariba" }
     ],
     whereConditions: [
-       { attribute: "region", operator: "=", value: "EMEA" }
+       { attribute: "server.region", operator: "=", value: "EU" } // Example modification to match context
     ]
   },
   {
@@ -115,18 +123,17 @@ export const mockPolicies: PolicyRule[] = [
   {
     id: "pol-ams-4",
     agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    actionType: "Invoke Tool",
+    actionType: "Ask For Consent",
     resource: {
       type: "Tools"
     },
     whenConditions: [
-      { attribute: "owner.consented", operator: "=", value: "true" }
+      { attribute: "active-orders", operator: ">", value: "4" }
     ],
     whereConditions: [
-      { attribute: "data-sensitivity", operator: "=", value: "sensitive" }
+      { attribute: "id", operator: "=", value: "create-order" }
     ]
   },
-  // Legacy style migrated to new structure
   {
     id: "pol-legacy-1",
     agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
