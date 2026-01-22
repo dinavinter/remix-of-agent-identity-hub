@@ -39,6 +39,8 @@ export const attributeTypes = [
   { value: "agent.subaccount", label: "Agent Subaccount" },
   { value: "user.location", label: "User Location" },
   { value: "tag:hr", label: "Tag: HR" },
+  { value: "data-sensitivity", label: "Data Sensitivity" },
+  { value: "data-type", label: "Data Type" },
 ];
 
 export const attributeValues: Record<string, string[]> = {
@@ -51,6 +53,8 @@ export const attributeValues: Record<string, string[]> = {
   "agent.region": ["EMEA", "US", "APAC"],
   "agent.subaccount": ["Global", "Regional"],
   "user.location": ["agent.region", "EU", "US"],
+  "data-sensitivity": ["sensitive", "public", "confidential", "internal"],
+  "data-type": ["pii", "financial", "technical", "business"],
 };
 
 export const resourceTypes: ResourceType[] = [
@@ -189,6 +193,30 @@ export const mockPolicies: PolicyRule[] = [
       server: ["mcp-commerce-products", "mcp-commerce-orders"]
     },
     conditions: []
+  },
+  {
+    id: "pol-consent-1",
+    agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    actionType: "Ask For Consent",
+    resource: {
+      type: "Tools",
+      server: { createdBy: "sap/ariba" }
+    },
+    conditions: [
+      { attribute: "data-sensitivity", operator: "=", value: "sensitive" }
+    ]
+  },
+  {
+    id: "pol-consent-2",
+    agentId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    actionType: "Ask For Consent",
+    resource: {
+      type: "Tools",
+      server: { createdBy: "sap/ariba" }
+    },
+    conditions: [
+      { attribute: "data-type", operator: "=", value: "pii" }
+    ]
   }
 ];
 
