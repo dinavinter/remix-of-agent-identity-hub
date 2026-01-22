@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Check, Box, Server, Wrench, User } from "lucide-react";
-import { PolicyRule, PolicyActionType, attributeValues, ResourceDefinition } from "@/data/mockPolicies";
+import { PolicyRule, PolicyActionType, attributeValues, ResourceDefinition, PolicyCondition } from "@/data/mockPolicies";
 import {
   Command,
   CommandEmpty,
@@ -21,7 +21,8 @@ import { cn } from "@/lib/utils";
 interface PolicyRuleItemProps {
   rule: PolicyRule;
   onDelete: (id: string) => void;
-  onUpdateValue?: (id: string, conditionIndex: number, newValue: string) => void;
+  // TODO: Update handler to support editing specific condition lists (when/where)
+  onUpdateValue?: (id: string, type: 'when' | 'where', conditionIndex: number, newValue: string) => void;
 }
 
 const actionTypeStyles: Record<PolicyActionType, string> = {
@@ -75,19 +76,98 @@ function ResourceDisplay({ resource }: { resource: ResourceDefinition }) {
   );
 }
 
-export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItemProps) {
-  // State to track which condition is being edited
-  const [editingConditionIndex, setEditingConditionIndex] = useState<number | null>(null);
+function ConditionList({ conditions, type, onUpdateValue }: { conditions: PolicyCondition[], type: 'when' | 'where', onUpdateValue?: (idx: number, val: string) => void }) {
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const handleSelectValue = (value: string) => {
-    if (editingConditionIndex !== null) {
-      onUpdateValue?.(rule.id, editingConditionIndex, value);
-      setEditingConditionIndex(null);
-    }
-  };
+  if (conditions.length === 0) return null;
 
   return (
+    <>
+      <span className="text-muted-foreground text-sm font-medium italic mx-1">{type}</span>
+      <div className="flex flex-wrap gap-2">
+        {conditions.map((condition, index) => {
+          const availableValues = attributeValues[condition.attribute] || [];
+          const isEditing = editingIndex === index;
+
+          const handleSelect = (val: string) => {
+            onUpdateValue?.(index, val);
+            setEditingIndex(null);
+          };
+
+          return (
+            <div key={index} className="flex items-center gap-1 bg-muted/40 px-2 py-1 rounded border border-transparent hover:border-border transition-colors">
+              <span className="font-mono text-xs text-muted-foreground">
+                {condition.attribute}
+              </span>
+              
+              <span className="text-xs text-muted-foreground font-bold">
+                {condition.operator}
+              </span>
+
+              <Popover open={isEditing} onOpenChange={(open) => setEditingIndex(open ? index : null)}>
+                <PopoverTrigger asChild>
+                  <span 
+                    className={cn(
+                      "font-mono text-xs font-medium cursor-pointer px-1.5 py-0.5 rounded transition-colors",
+                      "bg-warning/10 text-warning-foreground hover:bg-warning/20",
+                      !condition.value && condition.operator !== "exists" && "italic text-muted-foreground bg-transparent"
+                    )}
+                  >
+                    {condition.value || (condition.operator === "exists" ? "exists" : "value")}
+                  </span>
+                </PopoverTrigger>
+                {availableValues.length > 0 && (
+                  <PopoverContent className="w-[200px] p-0 bg-popover border z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search value..." className="h-9" />
+                      <CommandList>
+                        <CommandEmpty>No value found.</CommandEmpty>
+                        <CommandGroup>
+                          {availableValues.map((val) => (
+                            <CommandItem
+                              key={val}
+                              value={val}
+                              onSelect={() => handleSelect(val)}
+                              className="cursor-pointer"
+                            >
+                              {val}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  condition.value === val ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                )}
+              </Popover>
+              
+              {index < conditions.length - 1 && (
+                <span className="text-[10px] text-muted-foreground ml-1 uppercase">and</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItemProps) {
+  return (
     <div className="flex flex-wrap items-center gap-2 p-3 bg-card border rounded-lg group hover:border-primary/30 transition-colors">
+      
+      {/* When Conditions */}
+      <ConditionList 
+        conditions={rule.whenConditions} 
+        type="when" 
+        onUpdateValue={(idx, val) => onUpdateValue?.(rule.id, 'when', idx, val)}
+      />
+
       {/* Action Type */}
       <Badge 
         variant="outline" 
@@ -96,93 +176,15 @@ export function PolicyRuleItem({ rule, onDelete, onUpdateValue }: PolicyRuleItem
         {rule.actionType}
       </Badge>
 
-      {/* Acting As (Optional) */}
-      {rule.actingAs && (
-        <>
-          <span className="text-muted-foreground text-sm">when acting as</span>
-          <Badge variant="secondary" className="font-mono text-xs px-2 py-1 bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800">
-            {rule.actingAs}
-          </Badge>
-        </>
-      )}
-
       {/* Resource */}
-      <span className="text-muted-foreground text-sm">
-        to access
-      </span>
-      
       <ResourceDisplay resource={rule.resource} />
 
-      {/* Conditions */}
-      {rule.conditions.length > 0 && (
-        <>
-          <span className="text-muted-foreground text-sm font-medium">where</span>
-          <div className="flex flex-wrap gap-2">
-            {rule.conditions.map((condition, index) => {
-              const availableValues = attributeValues[condition.attribute] || [];
-              const isEditing = editingConditionIndex === index;
-
-              return (
-                <div key={index} className="flex items-center gap-1 bg-muted/40 px-2 py-1 rounded border border-transparent hover:border-border transition-colors">
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {condition.attribute}
-                  </span>
-                  
-                  <span className="text-xs text-muted-foreground font-bold">
-                    {condition.operator}
-                  </span>
-
-                  <Popover open={isEditing} onOpenChange={(open) => setEditingConditionIndex(open ? index : null)}>
-                    <PopoverTrigger asChild>
-                      <span 
-                        className={cn(
-                          "font-mono text-xs font-medium cursor-pointer px-1.5 py-0.5 rounded transition-colors",
-                          "bg-warning/10 text-warning-foreground hover:bg-warning/20",
-                          !condition.value && condition.operator !== "exists" && "italic text-muted-foreground bg-transparent"
-                        )}
-                      >
-                        {condition.value || (condition.operator === "exists" ? "exists" : "value")}
-                      </span>
-                    </PopoverTrigger>
-                    {availableValues.length > 0 && (
-                      <PopoverContent className="w-[200px] p-0 bg-popover border z-50" align="start">
-                        <Command>
-                          <CommandInput placeholder="Search value..." className="h-9" />
-                          <CommandList>
-                            <CommandEmpty>No value found.</CommandEmpty>
-                            <CommandGroup>
-                              {availableValues.map((val) => (
-                                <CommandItem
-                                  key={val}
-                                  value={val}
-                                  onSelect={() => handleSelectValue(val)}
-                                  className="cursor-pointer"
-                                >
-                                  {val}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      condition.value === val ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    )}
-                  </Popover>
-                  
-                  {index < rule.conditions.length - 1 && (
-                    <span className="text-[10px] text-muted-foreground ml-1 uppercase">and</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+      {/* Where Conditions */}
+      <ConditionList 
+        conditions={rule.whereConditions} 
+        type="where" 
+        onUpdateValue={(idx, val) => onUpdateValue?.(rule.id, 'where', idx, val)}
+      />
 
       <div className="flex-1" />
       
