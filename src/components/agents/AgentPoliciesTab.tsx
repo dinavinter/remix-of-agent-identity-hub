@@ -14,9 +14,9 @@ import { PolicyRuleItem } from "./PolicyRuleItem";
 import {
   PolicyRule,
   PolicyActionType,
-  TargetType,
   getPoliciesForAgent,
-  policyTargetTemplates,
+  resourceTypes,
+  ResourceType,
   attributeTypes,
   attributeValues,
 } from "@/data/mockPolicies";
@@ -34,13 +34,12 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
 
   // New policy form state
   const [newActionType, setNewActionType] = useState<PolicyActionType>("Allow");
-  const [newTarget, setNewTarget] = useState<string>("");
-  const [newWhereAttribute, setNewWhereAttribute] = useState<string>("");
-  const [newWhereValue, setNewWhereValue] = useState<string>("");
+  const [newResourceType, setNewResourceType] = useState<ResourceType>("Tools");
+  const [newConditionAttr, setNewConditionAttr] = useState<string>("");
+  const [newConditionValue, setNewConditionValue] = useState<string>("");
 
-  const selectedTarget = policyTargetTemplates.find((t) => t.value === newTarget);
-  const availableWhereValues = newWhereAttribute
-    ? attributeValues[newWhereAttribute] || []
+  const availableConditionValues = newConditionAttr
+    ? attributeValues[newConditionAttr] || []
     : [];
 
   const handleDeleteRule = (id: string) => {
@@ -48,35 +47,44 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
     toast.success("Policy rule removed");
   };
 
-  const handleUpdateValue = (id: string, newValue: string) => {
+  const handleUpdateValue = (id: string, conditionIndex: number, newValue: string) => {
     setPolicies((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, whereValue: newValue } : p))
+      prev.map((p) => {
+        if (p.id === id) {
+          const newConditions = [...p.conditions];
+          if (newConditions[conditionIndex]) {
+            newConditions[conditionIndex] = { ...newConditions[conditionIndex], value: newValue };
+          }
+          return { ...p, conditions: newConditions };
+        }
+        return p;
+      })
     );
     toast.success("Policy value updated");
   };
 
   const handleAddRule = () => {
-    if (!newTarget || !newWhereAttribute || !newWhereValue) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
     const newRule: PolicyRule = {
       id: `pol-${Date.now()}`,
       agentId: agent.id,
       actionType: newActionType,
-      target: newTarget,
-      targetType: selectedTarget?.type || "MCP Tool",
-      whereAttribute: newWhereAttribute,
-      whereValue: newWhereValue,
+      resource: {
+        type: newResourceType,
+      },
+      conditions: newConditionAttr ? [
+        {
+          attribute: newConditionAttr,
+          operator: "=",
+          value: newConditionValue || "value"
+        }
+      ] : []
     };
 
     setPolicies((prev) => [...prev, newRule]);
     
     // Reset form
-    setNewTarget("");
-    setNewWhereAttribute("");
-    setNewWhereValue("");
+    setNewConditionAttr("");
+    setNewConditionValue("");
     
     toast.success("Policy rule added");
   };
@@ -151,39 +159,40 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
                   <SelectItem value="Allow">Allow</SelectItem>
                   <SelectItem value="Deny">Deny</SelectItem>
                   <SelectItem value="Ask For Consent">Ask For Consent</SelectItem>
+                  <SelectItem value="Invoke Tool">Invoke Tool</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Target */}
+            {/* Resource Type */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Target:</Label>
-              <Select value={newTarget} onValueChange={setNewTarget}>
+              <Label className="text-xs text-muted-foreground">Resource Type:</Label>
+              <Select value={newResourceType} onValueChange={(v) => setNewResourceType(v as ResourceType)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="-- Select from loaded template --" />
+                  <SelectValue placeholder="Select resource type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {policyTargetTemplates.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}: {t.type}
+                  {resourceTypes.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Where Attribute */}
+            {/* Condition Attribute */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Where:</Label>
+              <Label className="text-xs text-muted-foreground">Where (Optional):</Label>
               <Select
-                value={newWhereAttribute}
+                value={newConditionAttr}
                 onValueChange={(v) => {
-                  setNewWhereAttribute(v);
-                  setNewWhereValue(""); // Reset value when attribute changes
+                  setNewConditionAttr(v);
+                  setNewConditionValue(""); // Reset value when attribute changes
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="-- No constraint --" />
+                  <SelectValue placeholder="-- No condition --" />
                 </SelectTrigger>
                 <SelectContent>
                   {attributeTypes.map((attr) => (
@@ -195,25 +204,25 @@ export function AgentPoliciesTab({ agent }: AgentPoliciesTabProps) {
               </Select>
             </div>
 
-            {/* Where Value */}
+            {/* Condition Value */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">:</Label>
+              <Label className="text-xs text-muted-foreground">Value:</Label>
               <Select
-                value={newWhereValue}
-                onValueChange={setNewWhereValue}
-                disabled={!newWhereAttribute}
+                value={newConditionValue}
+                onValueChange={setNewConditionValue}
+                disabled={!newConditionAttr}
               >
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      newWhereAttribute
+                      newConditionAttr
                         ? "-- Select value --"
-                        : "Select attribute type first"
+                        : "Select attribute first"
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableWhereValues.map((val) => (
+                  {availableConditionValues.map((val) => (
                     <SelectItem key={val} value={val}>
                       {val}
                     </SelectItem>
