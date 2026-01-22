@@ -8,6 +8,8 @@ on:
 
 jobs:
   sync:
+    # Only run on the source GitHub repository, not on the enterprise mirror
+    if: github.repository == 'dinavinter/remix-of-agent-identity-hub'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,29 +18,24 @@ jobs:
           fetch-depth: 0
 
       - name: Sync to Enterprise Repo
+        env:
+          ENTERPRISE_TOKEN: ${{ secrets.ENTERPRISE_GITHUB_TOKEN }}
         run: |
-          # Construct token to avoid secret scanning detection in source code
-          # This is a workaround since we cannot set secrets in this environment
-          # The token is split into parts to bypass regex matching during push
-          P1="ghp_UTJHMoPgi"
-          P2="3dhqkYNlGFkIaHou"
-          P3="0S8DR2FOfa4"
-          TOKEN="${P1}${P2}${P3}"
-          
-          # Mask the token to prevent it from showing in logs
-          echo "::add-mask::$TOKEN"
-          
+          if [ -z "$ENTERPRISE_TOKEN" ]; then
+            echo "Error: ENTERPRISE_GITHUB_TOKEN secret is not set."
+            echo "Please set the ENTERPRISE_GITHUB_TOKEN secret in the repository settings."
+            exit 1
+          fi
+
           # Target Repository URL
-          # Note: In a production environment, use ${{ secrets.ENTERPRISE_TOKEN }}
           TARGET_REPO="github.tools.sap/AIAM/agent-identity-ias-tenant-view.git"
-          TARGET_URL="https://oauth2:$TOKEN@$TARGET_REPO"
+          TARGET_URL="https://oauth2:$ENTERPRISE_TOKEN@$TARGET_REPO"
           
           echo "Adding enterprise remote..."
           git remote add enterprise "$TARGET_URL"
           
           echo "Syncing branches..."
           # Push all references from origin to enterprise
-          # mapping remote origin branches to heads on enterprise
           git push enterprise "refs/remotes/origin/*:refs/heads/*" --force
           
           echo "Syncing tags..."
