@@ -40,3 +40,26 @@ jobs:
           
           echo "Syncing tags..."
           git push enterprise --tags --force
+          
+          # Update homepage in package.json for the current branch
+          if [[ "$GITHUB_REF" == refs/heads/* ]]; then
+            echo "Updating homepage in package.json..."
+            
+            # Construct Homepage URL (remove .git suffix)
+            HOMEPAGE_URL="https://${TARGET_REPO%.git}"
+            
+            # Update homepage using jq
+            jq --indent 2 --arg homepage "$HOMEPAGE_URL" '.homepage = $homepage' package.json > package.json.tmp && mv package.json.tmp package.json
+            
+            # Configure git
+            git config user.name "GitHub Action"
+            git config user.email "action@github.com"
+            
+            # Commit the change
+            git add package.json
+            git commit -m "chore: update homepage for enterprise deployment" || echo "No changes to commit"
+            
+            BRANCH_NAME=${GITHUB_REF#refs/heads/}
+            echo "Pushing modified branch $BRANCH_NAME..."
+            git push enterprise HEAD:refs/heads/$BRANCH_NAME --force
+          fi
