@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - '**'
+      - '!gh-pages'
   workflow_dispatch:
 
 jobs:
@@ -35,8 +36,12 @@ jobs:
           git remote add enterprise "$TARGET_URL"
           
           echo "Syncing branches..."
-          # Push all references from origin to enterprise
-          git push enterprise "refs/remotes/origin/*:refs/heads/*" --force
+          # Push all references from origin to enterprise, excluding gh-pages
+          git for-each-ref --format='%(refname:short)' refs/remotes/origin/ | grep -vFx "origin/gh-pages" | grep -vFx "origin/HEAD" | while read remote; do
+            branch=${remote#origin/}
+            echo "Pushing $branch..."
+            git push enterprise "$remote:refs/heads/$branch" --force
+          done
           
           echo "Syncing tags..."
           git push enterprise --tags --force
